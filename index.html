@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Craftsman — The Making of an Engineer</title>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png">
+<style>
+  :root{
+    --bg:#0d2440; --bg2:#0a1c33; --panel:#123058; --panel2:#16386a;
+    --line:#2c4f7c; --text:#eaf2fb; --muted:#9db8d6;
+    --accent:#e8975a; --steel:#cfd8e3;
+    --good:#7fd08a; --mid:#f2c14e; --bad:#ef7d6b;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      repeating-linear-gradient(0deg, rgba(120,170,230,.06) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(120,170,230,.06) 0 1px, transparent 1px 28px),
+      linear-gradient(180deg, var(--bg), var(--bg2));
+    color:var(--text);
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+  .hidden{display:none !important}
+
+  /* ---------- title screen ---------- */
+  #scr-title{text-align:center;padding-top:28px}
+  #scr-title img.logo{width:100%;max-width:420px;border-radius:14px;box-shadow:0 10px 34px rgba(0,0,0,.45)}
+  #scr-title .sub{margin:14px 0 4px;color:var(--muted);font-size:14px;letter-spacing:.04em}
+  #scr-title .ver{margin-top:26px;color:#5f7ea3;font-size:12px;text-align:right}
+  .title-btns{margin-top:22px;text-align:left}
+
+  /* ---------- common ---------- */
+  .topbar{display:flex;align-items:center;gap:10px;margin:4px 0 14px}
+  .topbar .rank{font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .topbar .ttl{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .btn{display:block;width:100%;text-align:left;padding:14px 16px;margin:8px 0;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+  .btn small{display:block;color:var(--muted);font-size:12px;white-space:normal;margin-top:3px;line-height:1.5}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:#1d4e79;border-color:#3f74a8;font-weight:700}
+  .btn.ghost{background:transparent}
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn .badge{float:right;font-size:12px;color:var(--muted)}
+  .btn .badge.done{color:var(--good)}
+  .card{background:rgba(10,28,51,.72);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0;line-height:1.8;font-size:15px}
+  .card h3{margin:0 0 8px;font-size:15px;color:var(--accent)}
+  .card p{margin:0 0 10px}
+  .card p:last-child{margin-bottom:0}
+  .card ul{margin:6px 0;padding-left:20px}
+  .senpai{border-left:3px solid var(--accent);background:rgba(232,151,90,.08);padding:10px 12px;border-radius:0 10px 10px 0;margin:12px 0;line-height:1.8;font-size:14px}
+  .senpai b{color:var(--accent)}
+  .steps{display:flex;gap:6px;margin:10px 0 4px}
+  .steps span{flex:1;text-align:center;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 0;white-space:nowrap}
+  .steps span.on{color:#0a1c33;background:var(--accent);border-color:var(--accent);font-weight:700}
+  .steps span.done{color:var(--good);border-color:var(--good)}
+  .fb{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;line-height:1.8;font-size:14px;background:rgba(207,216,227,.06)}
+  .outcome{font-size:20px;font-weight:800;margin:6px 0 10px}
+  .outcome.good{color:var(--good)} .outcome.mid{color:var(--mid)} .outcome.bad{color:var(--bad)}
+
+  /* ---------- assemble ---------- */
+  .built{min-height:56px;border:1px dashed var(--line);border-radius:10px;padding:8px;margin:10px 0}
+  .built .empty{color:var(--muted);font-size:13px;padding:8px 4px}
+  .piece{display:block;width:100%;text-align:left;padding:11px 13px;margin:7px 0;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--text);font-size:14px;cursor:pointer;line-height:1.6}
+  .piece code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  .piece.placed{background:#1d4e79;border-color:#3f74a8}
+  .pool-label{font-size:12px;color:var(--muted);margin:14px 0 2px}
+
+  /* ---------- zukan ---------- */
+  .zgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .zcard{border:1px solid var(--line);border-radius:12px;padding:12px;background:rgba(10,28,51,.72);min-height:118px}
+  .zcard .zn{font-weight:800;font-size:15px;margin-bottom:6px}
+  .zcard .zd{font-size:12px;line-height:1.7;color:var(--steel)}
+  .zcard .zr{font-size:11px;margin-top:6px}
+  .zcard.locked{opacity:.45}
+  .zcard.locked .zn{color:var(--muted)}
+  .rank-good{color:var(--good)} .rank-mid{color:var(--mid)} .rank-bad{color:var(--bad)}
+  .note{color:var(--muted);font-size:13px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- title -->
+  <section id="scr-title">
+    <img class="logo" src="assets/logo-craftsman.jpg" alt="Craftsman — The Making of an Engineer">
+    <div class="sub">新人コーダーから Craftsman へ。技術と時代を辿る、判断と組み立ての物語。</div>
+    <div class="title-btns">
+      <button class="btn primary" id="btn-start">▶ はじめから</button>
+      <button class="btn" id="btn-continue">▶ つづきから</button>
+      <button class="btn" id="btn-title-zukan">▶ 技術カード図鑑</button>
+    </div>
+    <div class="ver">Craftsman v0.1</div>
+  </section>
+
+  <!-- home: parts -->
+  <section id="scr-home" class="hidden">
+    <div class="topbar"><span class="rank" id="home-rank">新人コーダー</span><span class="ttl">キャリアの歩み</span></div>
+    <div id="part-list"></div>
+    <button class="btn" id="btn-home-zukan">▶ 技術カード図鑑</button>
+    <button class="btn ghost" id="btn-home-title">▶ タイトルへ戻る</button>
+  </section>
+
+  <!-- part: chapters -->
+  <section id="scr-part" class="hidden">
+    <div class="topbar"><span class="rank" id="part-rank">新人コーダー</span><span class="ttl" id="part-name"></span></div>
+    <div id="chapter-list"></div>
+    <button class="btn ghost" id="btn-part-back">▶ もどる</button>
+  </section>
+
+  <!-- chapter: scenarios -->
+  <section id="scr-chapter" class="hidden">
+    <div class="topbar"><span class="rank" id="chap-rank">新人コーダー</span><span class="ttl" id="chap-name"></span></div>
+    <div id="scenario-list"></div>
+    <button class="btn ghost" id="btn-chap-back">▶ もどる</button>
+  </section>
+
+  <!-- play -->
+  <section id="scr-play" class="hidden">
+    <div class="topbar"><span class="rank" id="play-rank">新人コーダー</span><span class="ttl" id="play-title"></span></div>
+    <div class="steps" id="play-steps">
+      <span data-s="0">依頼</span><span data-s="1">判断</span><span data-s="2">組み立て</span><span data-s="3">結果</span><span data-s="4">解説</span><span data-s="5">記録</span>
+    </div>
+    <div id="play-body"></div>
+    <button class="btn ghost" id="btn-play-quit">▶ やめて戻る</button>
+  </section>
+
+  <!-- zukan -->
+  <section id="scr-zukan" class="hidden">
+    <div class="topbar"><span class="rank" id="zukan-rank">新人コーダー</span><span class="ttl">技術カード図鑑</span></div>
+    <div class="note" id="zukan-count"></div>
+    <div class="zgrid" id="zukan-grid"></div>
+    <button class="btn ghost" id="btn-zukan-back">▶ もどる</button>
+  </section>
+
+</div>
+<script>
+"use strict";
+/* ================= DATA ================= */
+const RANKS = ["新人コーダー","コーダー","プログラマ","エンジニア","シニアエンジニア","アーキテクト","Craftsman"];
+
+const PARTS = [
+  {id:1, label:"第1部", name:"始まり", chapters:[
+    {id:"tut", name:"チュートリアル", scenarios:["prog","basic","bbs"]},
+    {id:"firstlang", name:"最初の言語たち", scenarios:[]}
+  ]},
+  {id:2, label:"第2部", name:"基盤", chapters:[
+    {id:"honkaku", name:"本格言語", scenarios:[]},
+    {id:"kikan", name:"基幹システムとメインフレーム", scenarios:[]},
+    {id:"db", name:"データベース", scenarios:[]},
+    {id:"modeling2", name:"モデリング", scenarios:[]}
+  ]},
+  {id:3, label:"第3部", name:"Web", chapters:[
+    {id:"dotnet", name:".NET", scenarios:[]},
+    {id:"webapp", name:"Webアプリケーション", scenarios:[]},
+    {id:"modernweb", name:"モダンWeb", scenarios:[]},
+    {id:"mobile", name:"モバイル", scenarios:[]}
+  ]},
+  {id:4, label:"第4部", name:"道具と管理", chapters:[
+    {id:"ide", name:"IDE／エディタ", scenarios:[]},
+    {id:"scm", name:"ドキュメンテーション・ソースコード管理", scenarios:[]}
+  ]},
+  {id:5, label:"第5部", name:"現在", chapters:[
+    {id:"ai", name:"AIの時代", scenarios:[]},
+    {id:"python", name:"Python（シナリオ）", scenarios:[]},
+    {id:"docker", name:"Docker／コンテナ（シナリオ）", scenarios:[]},
+    {id:"desktop", name:"モダンデスクトップ", scenarios:[]}
+  ]},
+  {id:6, label:"終部", name:"匠", chapters:[
+    {id:"process", name:"開発プロセス", scenarios:[]},
+    {id:"fp", name:"関数型言語", scenarios:[]}
+  ]}
+];
+
+const SCENARIOS = {
+/* ---------- プログラムとは ---------- */
+prog: {
+  tech:"プログラムとは", title:"先輩からの最初の課題", era:"入社1日目・午前",
+  senpai:"まずは体験からだ。コンピュータはな、言われた通りのことしかしない。でも、言われたことは絶対にやってくれる。その性質を、身をもって知るのが最初の仕事だ。",
+  request:"開発室の練習用「朝食ロボット」に、目玉焼きトーストを作らせる。ロボットへの指示は手順カードで渡す。うまく作らせれば、最初の課題はクリアだ。",
+  constraints:["ロボットは書かれた手順だけを実行する","曖昧な指示は、そのまま事故になる"],
+  decisions:[
+    { q:"指示の出し方はどうする？", options:[
+      { label:"「目玉焼きトーストを作って」と一言で渡す", score:0, fb:"ロボットは「作る」が分からず止まった。材料も道具も知らない相手に、目的だけでは動けない。" },
+      { label:"手順を最後まで細かく分解して渡す", score:2, fb:"一つひとつの動作に分解した。これならロボットにも分かる。" },
+      { label:"大まかな手順だけ渡し、細部はロボットに任せる", score:1, fb:"大筋は通ったが、「焼く」の加減で迷って止まった。任せられるのは、相手が判断できる範囲だけだ。" }
+    ]}
+  ],
+  assemble:{ intro:"ロボットに渡す手順カードを、正しい順番に並べよう。ピースをタップすると組み立て欄に移る。", pieces:[
+    "パンを取り出す","パンをトースターで焼く","フライパンで卵を焼く","焼けたパンに目玉焼きをのせる"
+  ]},
+  outcomes:{
+    good:"ロボットは完璧な目玉焼きトーストを作った。先輩はうなずいた。「上出来だ。プログラムってのは、要はこの『手順書』のことだ」",
+    mid:"なんとか食べられるものができた。手順の抜けや順番の甘さが、そのまま味に出た。",
+    bad:"パンは生焼け、卵はパンの下敷き。ロボットは悪くない。書かれた通りに動いただけだ。"
+  },
+  explain:"プログラムとは、コンピュータへの手順の記述。コンピュータは書かれた通りに、書かれたことだけを、文句も言わず正確に実行する。だから曖昧さと抜けは、そのまま不具合（バグ）になる。逆に言えば、手順に分解して正確に書けば、どんな仕事も任せられる。すべての技術はここから始まる。",
+  card:{ name:"プログラム", desc:"手順の記述。コンピュータは書かれた通りにだけ動く。" }
+},
+/* ---------- BASIC ---------- */
+basic: {
+  tech:"BASIC", title:"先生の平均点プログラム", era:"1980年代、パソコンが家庭と学校に広がり始めた頃",
+  senpai:"昔はな、電源を入れたら BASIC が待っていた。誰もが最初に触る言語だった。行番号と短い命令で、書いたらすぐ動く。その手軽さが大事なんだ。",
+  request:"学校の先生からの依頼。「クラスのテストの平均点を出すプログラムがほしい」。生徒は最大30人、人数はその都度ちがう。先生が自分で実行できる形で届けること。",
+  constraints:["使えるのは BASIC のみ","先生が自分で実行できること"],
+  decisions:[
+    { q:"平均の出し方はどうする？", options:[
+      { label:"点数を1人ずつ足していき、最後に人数で割る", score:2, fb:"合計と人数を覚えておく、正攻法だ。" },
+      { label:"点数を全部並べて、真ん中の人の点数を出す", score:0, fb:"それは中央値だ。「平均」と頼まれたものと違うものができた。仕様の読み違いは、動くプログラムでも失敗になる。" },
+      { label:"最高点と最低点の平均を出す", score:1, fb:"速いが、それは平均ではない。クラスの実態とずれた数字が出てしまう。" }
+    ]},
+    { q:"繰り返しの書き方はどうする？", options:[
+      { label:"FOR〜NEXT で人数分くり返す", score:2, fb:"回数が決まっている繰り返しには、これが素直だ。" },
+      { label:"GOTO で先頭へ飛び続ける", score:1, fb:"動くには動く。だが終わりの条件を書き忘れると永遠に回る。昔はよくやった失敗だ。" }
+    ]}
+  ],
+  assemble:{ intro:"BASIC のプログラムを、行の順番に並べよう。", code:true, pieces:[
+    '10 INPUT "人数は？", N',
+    "20 T = 0",
+    "30 FOR I = 1 TO N",
+    '40 INPUT "点数は？", S',
+    "50 T = T + S",
+    "60 NEXT I",
+    '70 PRINT "平均は", T / N'
+  ]},
+  outcomes:{
+    good:"先生の教室でプログラムが動いた。入力するたびに平均が出る。「これがコンピュータか」。その感動こそ、BASIC が広めたものだった。",
+    mid:"平均らしき数字は出た。だが途中の考え違いの分だけ、先生の手計算とずれている。",
+    bad:"無限に回る、割る数が違う。BASIC は正直だ。書いた通りの間違いを、そのまま実行してくれる。"
+  },
+  explain:"BASIC は Beginners' All-purpose Symbolic Instruction Code、初心者のために作られた言語。行番号と短い命令で、書いたらすぐ実行できる手軽さ（インタプリタ方式）が、パソコン黎明期に「誰もが触る最初の言語」の座を与えた。FOR〜NEXT の繰り返し、変数への代入、INPUT と PRINT。現代の言語の基礎体力は、だいたいここで身につく。",
+  card:{ name:"BASIC", desc:"初心者のために作られた言語。行番号と即実行が、パソコンを大衆のものにした。" }
+},
+/* ---------- 掲示板システム ---------- */
+bbs: {
+  tech:"掲示板システム", title:"町内会の電子掲示板", era:"世紀の変わり目、インターネットが家庭に届き始めた頃",
+  senpai:"入力して、一覧が出る。この単純な形が、Web のすべての基本になる。役割の分け方に注目してほしい。",
+  request:"町内会からの依頼。「公民館の連絡を、みんなが書き込めて、みんなが見られる掲示板をパソコンで作ってほしい」",
+  constraints:["書き込みは名前と本文だけ","新しい書き込みが上に来ること","電源を切っても書き込みが消えないこと"],
+  decisions:[
+    { q:"書き込みの保存先はどうする？", options:[
+      { label:"ファイルに書き出して保存する", score:2, fb:"電源を切っても残る。当時の掲示板の標準的なやり方だ。" },
+      { label:"プログラムの中の変数に持っておく", score:0, fb:"動いている間は速い。だが夜に電源を落としたら、町内会の連絡が全部消えた。大騒ぎだ。" },
+      { label:"書き込みのたびに紙に印刷する", score:1, fb:"紙には残る。だが画面の一覧には出ない。「見られる掲示板」の要件を満たしていない。" }
+    ]},
+    { q:"表示の順序はどうする？", options:[
+      { label:"新しい書き込みを上に", score:2, fb:"要件どおり。見る人は最新の連絡を先に見たい。" },
+      { label:"古い書き込みを上に", score:1, fb:"間違いではないが、要件と逆だ。いちばん下まで送らないと、新しい連絡が見えない。" }
+    ]}
+  ],
+  assemble:{ intro:"掲示板の仕組みのピースを、流れの順番に並べよう。", pieces:[
+    "入力フォーム（名前と本文）","受け取り処理（送られた内容を取り出す）","保存（ファイルへ書き込む）","読み出し（保存した内容を取り出す）","一覧表示（新しい順に並べる）"
+  ]},
+  outcomes:{
+    good:"公民館のパソコンで掲示板が動き出した。回覧板より速い、と町内会で評判になった。この「入力→処理→保存→表示」が、やがて世界中の Web サービスの原型になる。",
+    mid:"掲示板は動いた。だが順序や保存の甘さの分だけ、使い勝手に注文がついた。",
+    bad:"書き込みが消える、順番が逆。掲示板としては成り立たなかった。仕組みのどこで何をするか、分担の設計が足りなかった。"
+  },
+  explain:"掲示板システムは「入力フォーム → 受け取り処理 → 保存 → 読み出し → 一覧表示」という流れの実装だ。入力（View）、処理（Controller）、保存（Model）に役割を分ける考え方は、のちに MVC と呼ばれる設計の原型になる。Web アプリケーションは今も、この形の延長線上にある。",
+  card:{ name:"掲示板システム", desc:"入力・処理・保存・表示。Web アプリの原型であり、MVC の芽。" }
+}
+};
+/* ================= ENGINE ================= */
+const SAVE_KEY = "craftsman-save-v1";
+let save = loadSave();
+function loadSave(){
+  try{ const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if(s && s.cleared) return s; }catch(e){}
+  return { cleared:{} }; // cleared: { scenId: "good"|"mid"|"bad" }
+}
+function storeSave(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
+function hasSave(){ return Object.keys(save.cleared).length > 0; }
+
+const $ = id => document.getElementById(id);
+const SCREENS = ["scr-title","scr-home","scr-part","scr-chapter","scr-play","scr-zukan"];
+function show(id){
+  SCREENS.forEach(s => $(s).classList.toggle("hidden", s !== id));
+  window.scrollTo(0,0);
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---- progress helpers ---- */
+function partScenarios(part){ return part.chapters.flatMap(c => c.scenarios).filter(id => SCENARIOS[id]); }
+function partCleared(part){ const ids = partScenarios(part); return ids.length > 0 && ids.every(id => save.cleared[id]); }
+function rankIndex(){ return Math.min(PARTS.filter(partCleared).length, RANKS.length - 1); }
+function rankName(){ return RANKS[rankIndex()]; }
+function setRanks(){ ["home-rank","part-rank","chap-rank","play-rank","zukan-rank"].forEach(id => { const el = $(id); if(el) el.textContent = rankName(); }); }
+const RANK_LABEL = { good:"成功", mid:"一部成功", bad:"失敗" };
+
+/* ---- navigation state ---- */
+let curPart = null, curChapter = null, zukanFrom = "scr-title";
+
+/* ---- home: parts ---- */
+function renderHome(){
+  setRanks();
+  const list = $("part-list"); list.innerHTML = "";
+  PARTS.forEach((part, i) => {
+    const ids = partScenarios(part);
+    const done = ids.filter(id => save.cleared[id]).length;
+    const b = document.createElement("button");
+    b.className = "btn";
+    let badge;
+    if(ids.length === 0) badge = '<span class="badge">準備中</span>';
+    else if(partCleared(part)) badge = '<span class="badge done">クリア</span>';
+    else badge = '<span class="badge">' + done + " / " + ids.length + "</span>";
+    b.innerHTML = esc(part.label) + "　" + esc(part.name) + badge +
+      "<small>" + esc(part.chapters.map(c => c.name).join("／")) + "</small>";
+    b.disabled = ids.length === 0;
+    b.onclick = () => { curPart = part; renderPart(); show("scr-part"); };
+    list.appendChild(b);
+  });
+  show("scr-home");
+}
+
+/* ---- part: chapters ---- */
+function renderPart(){
+  setRanks();
+  $("part-name").textContent = curPart.label + " " + curPart.name;
+  const list = $("chapter-list"); list.innerHTML = "";
+  curPart.chapters.forEach(ch => {
+    const ids = ch.scenarios.filter(id => SCENARIOS[id]);
+    const done = ids.filter(id => save.cleared[id]).length;
+    const b = document.createElement("button");
+    b.className = "btn";
+    let badge;
+    if(ids.length === 0) badge = '<span class="badge">準備中</span>';
+    else if(done === ids.length) badge = '<span class="badge done">クリア</span>';
+    else badge = '<span class="badge">' + done + " / " + ids.length + "</span>";
+    b.innerHTML = "章「" + esc(ch.name) + "」" + badge +
+      (ids.length ? "<small>" + esc(ids.map(id => SCENARIOS[id].tech).join("／")) + "</small>" : "");
+    b.disabled = ids.length === 0;
+    b.onclick = () => { curChapter = ch; renderChapter(); show("scr-chapter"); };
+    list.appendChild(b);
+  });
+}
+
+/* ---- chapter: scenarios ---- */
+function renderChapter(){
+  setRanks();
+  $("chap-name").textContent = "章「" + curChapter.name + "」";
+  const list = $("scenario-list"); list.innerHTML = "";
+  curChapter.scenarios.filter(id => SCENARIOS[id]).forEach(id => {
+    const sc = SCENARIOS[id];
+    const r = save.cleared[id];
+    const b = document.createElement("button");
+    b.className = "btn";
+    b.innerHTML = esc(sc.tech) + (r ? '<span class="badge done">' + RANK_LABEL[r] + "</span>" : "") +
+      "<small>" + esc(sc.title) + " ― " + esc(sc.era) + "</small>";
+    b.onclick = () => startScenario(id);
+    list.appendChild(b);
+  });
+}
+
+/* ---- play ---- */
+let play = null;
+function startScenario(id){
+  const sc = SCENARIOS[id];
+  play = { id, sc, dIdx:0, score:0,
+    maxScore: sc.decisions.reduce((a,d) => a + Math.max(...d.options.map(o => o.score)), 0) + 2,
+    placed: [], pool: shuffle(sc.assemble.pieces.map((_, i) => i)) };
+  setRanks();
+  $("play-title").textContent = sc.tech;
+  renderRequest();
+  show("scr-play");
+}
+function shuffle(a){ a = a.slice(); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function setSteps(n){
+  document.querySelectorAll("#play-steps span").forEach(el => {
+    const s = +el.dataset.s;
+    el.classList.toggle("on", s === n);
+    el.classList.toggle("done", s < n);
+  });
+}
+function bodyHTML(html){ $("play-body").innerHTML = html; }
+function nextBtn(label, fn){
+  const b = document.createElement("button");
+  b.className = "btn primary"; b.textContent = "▶ " + label; b.onclick = fn;
+  $("play-body").appendChild(b);
+}
+
+function renderRequest(){
+  setSteps(0);
+  const sc = play.sc;
+  bodyHTML(
+    (sc.senpai ? '<div class="senpai"><b>先輩</b>　' + esc(sc.senpai) + "</div>" : "") +
+    '<div class="card"><h3>依頼 ― ' + esc(sc.era) + "</h3><p>" + esc(sc.request) + "</p>" +
+    "<h3>制約</h3><ul>" + sc.constraints.map(c => "<li>" + esc(c) + "</li>").join("") + "</ul></div>"
+  );
+  nextBtn("引き受ける", renderDecision);
+}
+
+function renderDecision(){
+  setSteps(1);
+  const sc = play.sc, d = sc.decisions[play.dIdx];
+  bodyHTML('<div class="card"><h3>判断 ' + (play.dIdx + 1) + " / " + sc.decisions.length + "</h3><p>" + esc(d.q) + "</p></div>" +
+    '<div id="d-opts"></div><div id="d-fb"></div>');
+  const box = $("d-opts");
+  d.options.forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "btn"; b.textContent = opt.label;
+    b.onclick = () => {
+      play.score += opt.score;
+      box.querySelectorAll("button").forEach(x => x.disabled = true);
+      b.style.borderColor = "var(--accent)";
+      $("d-fb").innerHTML = '<div class="fb">' + esc(opt.fb) + "</div>";
+      nextBtn("次へ", () => {
+        play.dIdx++;
+        if(play.dIdx < sc.decisions.length) renderDecision(); else renderAssemble();
+      });
+      $("d-fb").scrollIntoView({behavior:"smooth", block:"nearest"});
+    };
+    box.appendChild(b);
+  });
+}
+
+function renderAssemble(){
+  setSteps(2);
+  const sc = play.sc;
+  bodyHTML('<div class="card"><h3>組み立て</h3><p>' + esc(sc.assemble.intro) + '</p></div>' +
+    '<div class="pool-label">組み立て欄（タップで戻す）</div><div class="built" id="a-built"></div>' +
+    '<div class="pool-label">ピース（タップで組み立て欄へ）</div><div id="a-pool"></div><div id="a-actions"></div>');
+  drawAssemble();
+}
+function drawAssemble(){
+  const sc = play.sc, built = $("a-built"), pool = $("a-pool"), act = $("a-actions");
+  built.innerHTML = play.placed.length ? "" : '<div class="empty">まだ何も置かれていない</div>';
+  play.placed.forEach(pi => {
+    const b = document.createElement("button");
+    b.className = "piece placed";
+    b.innerHTML = sc.assemble.code ? "<code>" + esc(sc.assemble.pieces[pi]) + "</code>" : esc(sc.assemble.pieces[pi]);
+    b.onclick = () => { play.placed = play.placed.filter(x => x !== pi); play.pool.push(pi); drawAssemble(); };
+    built.appendChild(b);
+  });
+  pool.innerHTML = "";
+  play.pool.forEach(pi => {
+    const b = document.createElement("button");
+    b.className = "piece";
+    b.innerHTML = sc.assemble.code ? "<code>" + esc(sc.assemble.pieces[pi]) + "</code>" : esc(sc.assemble.pieces[pi]);
+    b.onclick = () => { play.pool = play.pool.filter(x => x !== pi); play.placed.push(pi); drawAssemble(); };
+    pool.appendChild(b);
+  });
+  act.innerHTML = "";
+  const done = document.createElement("button");
+  done.className = "btn primary"; done.textContent = "▶ 完成させる";
+  done.disabled = play.pool.length > 0;
+  done.onclick = judgeAssemble;
+  act.appendChild(done);
+  const reset = document.createElement("button");
+  reset.className = "btn ghost"; reset.textContent = "▶ ぜんぶ戻す";
+  reset.onclick = () => { play.pool = play.pool.concat(play.placed); play.placed = []; drawAssemble(); };
+  act.appendChild(reset);
+}
+function judgeAssemble(){
+  const n = play.sc.assemble.pieces.length;
+  let correct = 0;
+  play.placed.forEach((pi, pos) => { if(pi === pos) correct++; });
+  const ratio = correct / n;
+  play.score += ratio >= 1 ? 2 : (ratio >= 0.5 ? 1 : 0);
+  play.assembleRatio = ratio;
+  renderResult();
+}
+function outcomeKey(){
+  const r = play.score / play.maxScore;
+  return r >= 0.75 ? "good" : (r >= 0.4 ? "mid" : "bad");
+}
+function renderResult(){
+  setSteps(3);
+  const key = outcomeKey(), prev = save.cleared[play.id];
+  const rankOrder = { good:3, mid:2, bad:1 };
+  if(!prev || rankOrder[key] > rankOrder[prev]) save.cleared[play.id] = key;
+  storeSave();
+  bodyHTML('<div class="card"><h3>結果</h3><div class="outcome ' + key + '">' + RANK_LABEL[key] + "</div><p>" +
+    esc(play.sc.outcomes[key]) + "</p></div>");
+  nextBtn("解説を読む", renderExplain);
+}
+function renderExplain(){
+  setSteps(4);
+  bodyHTML('<div class="card"><h3>解説 ― ' + esc(play.sc.tech) + "</h3><p>" + esc(play.sc.explain) + "</p></div>");
+  nextBtn("記録へ", renderRecord);
+}
+function renderRecord(){
+  setSteps(5);
+  setRanks();
+  const key = save.cleared[play.id];
+  bodyHTML('<div class="card"><h3>記録 ― 技術カードを図鑑にしまった</h3>' +
+    '<div class="zcard" style="margin-top:8px"><div class="zn">' + esc(play.sc.card.name) + '</div>' +
+    '<div class="zd">' + esc(play.sc.card.desc) + '</div>' +
+    '<div class="zr rank-' + key + '">このシナリオの結果：' + RANK_LABEL[key] + "</div></div>" +
+    "<p style='margin-top:12px'>現在の呼称は「" + rankName() + "」。</p></div>");
+  nextBtn("シナリオ選択へ戻る", () => { renderChapter(); show("scr-chapter"); });
+}
+
+/* ---- zukan ---- */
+function renderZukan(){
+  setRanks();
+  const ids = Object.keys(SCENARIOS);
+  const owned = ids.filter(id => save.cleared[id]);
+  $("zukan-count").textContent = "集めたカード " + owned.length + " / " + ids.length + "（シナリオを進めると増えていく）";
+  const grid = $("zukan-grid"); grid.innerHTML = "";
+  ids.forEach(id => {
+    const sc = SCENARIOS[id], r = save.cleared[id];
+    const d = document.createElement("div");
+    d.className = "zcard" + (r ? "" : " locked");
+    d.innerHTML = '<div class="zn">' + (r ? esc(sc.card.name) : "？？？") + "</div>" +
+      '<div class="zd">' + (r ? esc(sc.card.desc) : "まだ手に入れていない技術カード。") + "</div>" +
+      (r ? '<div class="zr rank-' + r + '">最良の結果：' + RANK_LABEL[r] + "</div>" : "");
+    grid.appendChild(d);
+  });
+  show("scr-zukan");
+}
+
+/* ---- wiring ---- */
+$("btn-start").onclick = () => {
+  if(hasSave() && !confirm("はじめから始めると、保存された進行状況は消えます。よろしいですか？")) return;
+  save = { cleared:{} }; storeSave(); renderHome();
+};
+$("btn-continue").onclick = () => renderHome();
+$("btn-continue").disabled = !hasSave();
+$("btn-title-zukan").onclick = () => { zukanFrom = "scr-title"; renderZukan(); };
+$("btn-home-zukan").onclick = () => { zukanFrom = "scr-home"; renderZukan(); };
+$("btn-home-title").onclick = () => show("scr-title");
+$("btn-part-back").onclick = () => renderHome();
+$("btn-chap-back").onclick = () => { renderPart(); show("scr-part"); };
+$("btn-play-quit").onclick = () => { renderChapter(); show("scr-chapter"); };
+$("btn-zukan-back").onclick = () => show(zukanFrom);
+setRanks();
+</script>
+</body>
+</html>
