@@ -93,7 +93,7 @@
       <button class="btn" id="btn-continue">▶ つづきから</button>
       <button class="btn" id="btn-title-zukan">▶ 技術カード図鑑</button>
     </div>
-    <div class="ver">Craftsman v0.2</div>
+    <div class="ver">Craftsman v0.3</div>
   </section>
 
   <!-- home: parts -->
@@ -148,7 +148,7 @@ const PARTS = [
     {id:"firstlang", name:"最初の言語たち", scenarios:["perl","vb"]}
   ]},
   {id:2, label:"第2部", name:"基盤", chapters:[
-    {id:"honkaku", name:"本格言語", scenarios:[]},
+    {id:"honkaku", name:"本格言語", scenarios:["clang","java","vc"]},
     {id:"kikan", name:"基幹システムとメインフレーム", scenarios:[]},
     {id:"db", name:"データベース", scenarios:[]},
     {id:"modeling2", name:"モデリング", scenarios:[]}
@@ -326,6 +326,108 @@ vb: {
   },
   explain:"Visual Basic は、部品をフォームに貼って画面を作る RAD（高速開発）の代表格。プログラムは「ボタンがクリックされたら」「文字が入力されたら」という出来事（イベント）に反応して動く、イベント駆動の形を取る。専門の開発者でなくても業務アプリが作れる文化を広げ、のちに .NET の VB.NET へと続いていく。",
   card:{ name:"Visual Basic", desc:"部品を貼って画面を作る。イベント駆動と RAD が、業務アプリを現場の手に渡した。" }
+},
+/* ---------- C ---------- */
+clang: {
+  tech:"C", title:"計測装置のデータ処理", era:"1990年代、UNIX と組み込みの現場で",
+  senpai:"ここからは本格言語だ。C は速い。その代わり、メモリの面倒は全部こちらの責任になる。ポインタと配列の扱いが、この言語の心臓部だ。",
+  request:"工場の計測装置メーカーからの依頼。「センサーの値を読み取って平均を出すプログラムがほしい。装置は24時間動かし続けるので、絶対に落ちないこと」",
+  constraints:["24時間連続で動くこと（メモリの無駄遣いは許されない）","装置の CPU は非力なので、処理は速く"],
+  decisions:[
+    { q:"センサーの値の置き場所はどうする？", options:[
+      { label:"固定サイズのバッファを確保し、範囲を確かめてから使う", score:2, fb:"地味だが確実だ。置き場所と上限が決まっている安心感が、長時間稼働の土台になる。" },
+      { label:"値が届くたびに malloc で取り、使い終わったら free する", score:1, fb:"動くには動く。だが解放を一度でも忘れると、メモリが少しずつ減っていく。24時間稼働では致命傷になりかねない。" },
+      { label:"ポインタを避け、値を全部コピーして受け渡す", score:0, fb:"安全そうに見えて、非力な CPU では処理が間に合わなかった。速さの要件を満たせない。" }
+    ]},
+    { q:"バッファへの書き込みの備えは？", options:[
+      { label:"書き込む前に、必ず上限を超えていないか確認する", score:2, fb:"C の典型事故はバッファあふれだ。上限確認は、この言語で生きるための作法だ。" },
+      { label:"センサーは正しい数しか送らないはず、と信頼して書き込む", score:0, fb:"ある日、想定より多い値が届いて、隣のデータまで壊れた。「はず」は設計ではない。" }
+    ]}
+  ],
+  assemble:{ intro:"平均を出す C のプログラムを、行の順番に並べよう。", code:true, pieces:[
+    "#include <stdio.h>",
+    "int main(void) {",
+    "  int data[100];",
+    "  int count = read_sensor(data, 100);",
+    "  int sum = 0;",
+    "  for (int i = 0; i < count; i++) sum += data[i];",
+    '  printf("avg=%d\\n", sum / count);',
+    "  return 0;",
+    "}"
+  ]},
+  outcomes:{
+    good:"装置は24時間、静かに動き続けた。速くて、落ちない。C の現場では、それが何よりの勲章だ。",
+    mid:"プログラムは動いた。だが備えの甘さが、長時間稼働の不安として残った。",
+    bad:"数時間後に装置が止まった。メモリか、バッファか。C は、人の油断をそのまま事故に変える。"
+  },
+  explain:"C はハードウェアに近いところを直接触れる言語だ。ポインタでメモリを指し、配列の範囲も解放の管理も、すべてプログラマの責任になる。その分だけ速く、OS や組み込み機器の基盤として半世紀近く使われ続けてきた。多くの後発言語の文法は、C の子や孫にあたる。",
+  card:{ name:"C", desc:"メモリとポインタを人が握る。速さと引き換えの責任。OS と組み込みの礎。" }
+},
+/* ---------- Java ---------- */
+java: {
+  tech:"Java", title:"支店でも動く在庫管理", era:"1990年代後半、「一度書けばどこでも動く」の時代",
+  senpai:"Java の顔は三つある。まず言語としての顔だ。オブジェクト指向と厳密な型、そして JVM。基幹の顔と Web の顔は、またあとで出てくる。",
+  request:"商社のシステム担当からの依頼。「在庫管理のプログラムを作ってほしい。本社は Windows、支店は別の OS だが、同じものが動くこと。これから何年も大きくしていく前提で」",
+  constraints:["OS の違う支店でも、同じプログラムが動くこと","長く大きく育てるので、設計が崩れないこと"],
+  decisions:[
+    { q:"プログラムの設計の単位はどうする？", options:[
+      { label:"商品・在庫・注文をクラスとしてモデル化する", score:2, fb:"モノと振る舞いをひとかたまりにする、オブジェクト指向の正攻法だ。大きくしても崩れにくい。" },
+      { label:"処理の流れ（手続き）だけを並べて書く", score:1, fb:"小さければそれで足りる。だが何年も育てる前提では、変更のたびに全体が揺れる。" }
+    ]},
+    { q:"OS の違いへの対処は？", options:[
+      { label:"JVM に任せ、同じバイトコードを全店へ配る", score:2, fb:"「Write Once, Run Anywhere」。Java が用意した答えそのものだ。" },
+      { label:"支店の OS ごとにコンパイルし直して配る", score:0, fb:"配布物が何種類にも分かれ、修正のたびに全種類を作り直すことになった。Java を選んだ意味が消えた。" }
+    ]}
+  ],
+  assemble:{ intro:"在庫の「商品」クラスを、行の順番に並べよう。", code:true, pieces:[
+    "public class Item {",
+    "  private String name;",
+    "  private int stock;",
+    "  public Item(String name, int stock) {",
+    "    this.name = name;",
+    "    this.stock = stock;",
+    "  }",
+    "  public int getStock() { return stock; }",
+    "}"
+  ]},
+  outcomes:{
+    good:"同じプログラムが本社でも支店でも動いた。クラスで分けた設計は、その後の拡張にも耐えた。Java が業務システムの主役になっていく、まさにその姿だった。",
+    mid:"システムは動いた。だが設計や配布の遠回りの分だけ、運用に手間が残った。",
+    bad:"OS ごとに違うものを配る羽目になり、修正が回らなくなった。道具の思想を外すと、道具の利点も消える。"
+  },
+  explain:"Java は、コンパイルしたバイトコードを JVM（仮想マシン）が実行する言語だ。だから OS が違っても同じプログラムが動く。メモリの解放はガベージコレクションが担い、厳密な型付けとオブジェクト指向が、大勢で長く開発する仕事に向いている。言語としての Java はここまで。基幹システムの主役としての顔は次の章で、Web の顔は第3部で改めて扱う。",
+  card:{ name:"Java", desc:"JVM の上でどこでも動く。型とオブジェクト指向で、大規模と長期を支える。" }
+},
+/* ---------- VC (Visual C++) ---------- */
+vc: {
+  tech:"VC", title:"計測データの表示アプリ", era:"1990年代後半、Windows 95/NT の時代",
+  senpai:"Visual C++、略して VC だ。C の力で Windows の画面を作る。VB の手軽さでは届かないところへ行くための道具だよ。",
+  request:"計測装置メーカーから再び依頼。「この前の C の処理は速くて助かっている。今度は、値をグラフで見られる Windows アプリがほしい。処理の部品は今の C のものを使い回したい」",
+  constraints:["既存の C の処理部品を、そのまま活かすこと","Windows の画面（グラフ表示）があること"],
+  decisions:[
+    { q:"画面の土台はどうする？", options:[
+      { label:"MFC のクラスライブラリに乗る", score:2, fb:"ウィンドウやダイアログの土台が用意されている。Windows アプリ作りの本道だ。" },
+      { label:"Win32 API を全部直に叩いて書く", score:1, fb:"細部まで制御できる。だが画面一つに膨大な量のコードが要り、納期が遠のいた。" }
+    ]},
+    { q:"既存の C の処理部品の扱いは？", options:[
+      { label:"そのままリンクして再利用する", score:2, fb:"動いている部品は財産だ。C の資産が C++ からそのまま使えるのも、この道具の強みだ。" },
+      { label:"C++ の作法に合わせて全部書き直す", score:0, fb:"書き直しの途中で、動いていた処理に不具合を仕込んだ。動くものを触るリスクは、いつも高い。" }
+    ]}
+  ],
+  assemble:{ intro:"Visual C++ での仕事の流れを、順番に並べよう。", pieces:[
+    "AppWizard でプロジェクトの雛形を作る",
+    "ダイアログに部品を配置する",
+    "ClassWizard で部品とイベントを結びつける",
+    "C で書いた処理部品を呼び出す",
+    "結果をグラフに描く"
+  ]},
+  outcomes:{
+    good:"グラフのアプリが完成し、C の処理部品は一行も変えずに済んだ。速い処理と見やすい画面。VC の狙いどおりの組み合わせだ。",
+    mid:"アプリは動いた。だが土台選びの遠回りの分だけ、時間が溶けた。",
+    bad:"書き直した処理が元の精度を失い、現場から戻された。資産を壊しては、道具の意味がない。"
+  },
+  explain:"VC（Visual C++）は、C/C++ に MFC というクラスライブラリと統合開発環境を組み合わせた、Windows 開発の主役だった。ウィザードが雛形を作り、クラスとイベントを結びつけてアプリを組む。VB の手軽さと C の力のあいだを埋め、業務用 Windows アプリの多くがこの道具で作られた。",
+  card:{ name:"VC (Visual C++)", desc:"C の力で Windows の画面を作る。MFC と統合環境が、業務アプリの主役だった。" }
 }
 };
 /* ================= ENGINE ================= */
@@ -348,7 +450,13 @@ function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&l
 
 /* ---- progress helpers ---- */
 function partScenarios(part){ return part.chapters.flatMap(c => c.scenarios).filter(id => SCENARIOS[id]); }
-function partCleared(part){ const ids = partScenarios(part); return ids.length > 0 && ids.every(id => save.cleared[id]); }
+function partCleared(part){
+  // 部クリア = その部の全章にシナリオが実装され、すべてクリア済みのときだけ
+  return part.chapters.every(ch => {
+    const ids = ch.scenarios.filter(id => SCENARIOS[id]);
+    return ids.length > 0 && ids.every(id => save.cleared[id]);
+  });
+}
 function rankIndex(){ return Math.min(PARTS.filter(partCleared).length, RANKS.length - 1); }
 function rankName(){ return RANKS[rankIndex()]; }
 function setRanks(){ ["home-rank","part-rank","chap-rank","play-rank","zukan-rank"].forEach(id => { const el = $(id); if(el) el.textContent = rankName(); }); }
