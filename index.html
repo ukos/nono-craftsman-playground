@@ -93,7 +93,7 @@
       <button class="btn" id="btn-continue">▶ つづきから</button>
       <button class="btn" id="btn-title-zukan">▶ 技術カード図鑑</button>
     </div>
-    <div class="ver">Craftsman v0.10</div>
+    <div class="ver">Craftsman v0.11</div>
   </section>
 
   <!-- home: parts -->
@@ -157,7 +157,7 @@ const PARTS = [
     {id:"dotnet", name:".NET", scenarios:["vbnet","csharp","asp"]},
     {id:"webapp", name:"Webアプリケーション", scenarios:["websphere","apache","iis","tomcat","cgi","php","html","css","xml","parser","nodejs","bootstrap","jquery"]},
     {id:"modernweb", name:"モダンWeb", scenarios:["js","ts","react","ruby","rails"]},
-    {id:"mobile", name:"モバイル", scenarios:[]}
+    {id:"mobile", name:"モバイル", scenarios:["swift","kotlin","objc"]}
   ]},
   {id:4, label:"第4部", name:"道具と管理", chapters:[
     {id:"ide", name:"IDE／エディタ", scenarios:[]},
@@ -1484,6 +1484,99 @@ rails: {
   },
   explain:"Ruby on Rails は Ruby の Web フレームワークだ。『設定より規約（Convention over Configuration）』『同じことを繰り返さない（DRY）』を掲げ、規約に乗ることで圧倒的な開発速度を実現した。MVC の型、データベースのマイグレーション、scaffold による自動生成は、後の多くのフレームワークに影響を与えた。スタートアップの時代を象徴する道具である。",
   card:{ name:"Ruby on Rails", desc:"設定より規約。MVC の型で、最速の立ち上げを実現したフレームワーク。" }
+},
+/* ---------- Swift ---------- */
+swift: {
+  tech:"Swift", title:"安全に書ける Apple の言語", era:"iPhone アプリの現代",
+  senpai:"Swift は Apple の現代の標準言語だ。勘所は『安全さの設計』。値がないことを型で表す Optional が、その象徴だよ。落ちないアプリは、言語の設計から生まれる。",
+  request:"新規サービスの開発チームからの依頼。「iPhone アプリを作りたい。新規開発だから、安全に書ける今の標準で始めたい」",
+  constraints:["『値がない』ことが原因のクラッシュを、防げること","今の Apple プラットフォームの標準の作法に、乗ること"],
+  decisions:[
+    { q:"『値がない』場合の扱いは？", options:[
+      { label:"Optional で『ない』を型に表し、ある場合だけ取り出す", score:2, fb:"ないかもしれないことは、コードの形そのものに現れる。事故が『書くとき』に防げる設計だ。" },
+      { label:"どこでも強制的に値を取り出す", score:0, fb:"値がない場所でアプリが落ちた。安全の仕組みは、活かしてこそ意味がある。" }
+    ]},
+    { q:"画面の作り方は？", options:[
+      { label:"SwiftUI の宣言的な書き方で組む", score:2, fb:"状態が画面を決める、今の標準の型だ。React の章で掴んだ考え方が、ここでも活きる。" },
+      { label:"従来の命令的な UI の作法だけで組む", score:1, fb:"動くことは動く。だが今の標準の恩恵を取りこぼし、保守の選択肢も狭まった。" }
+    ]}
+  ],
+  assemble:{ intro:"iPhone アプリ開発の流れを、順番に並べよう。", pieces:[
+    "Xcode でプロジェクトを作る",
+    "Swift で画面とロジックを書く",
+    "シミュレータで動作を確認する",
+    "実機で動作を確認する",
+    "App Store へ申請する"
+  ]},
+  outcomes:{
+    good:"安全に書けて、クラッシュの少ないアプリができた。言語の設計に乗ることが、そのまま品質になった。",
+    mid:"アプリはできた。だが安全の仕組みの活かし方の分だけ、危うさが残った。",
+    bad:"値がない場所で落ちるアプリになった。安全な言語も、作法を外せば安全にはならない。"
+  },
+  explain:"Swift は Apple が2014年に発表したプログラミング言語で、Objective-C の後継として iOS／macOS アプリ開発の標準になった。Optional によって『値がない』ことを型で表すなど、安全性を言語仕様に組み込んだ設計が特徴だ。読みやすい文法と高速な実行を両立し、SwiftUI とともに現代の Apple プラットフォーム開発の中心にある。",
+  card:{ name:"Swift", desc:"Apple の現代の標準言語。『ない』を型で表し、安全さを設計に組み込む。" }
+},
+/* ---------- Kotlin ---------- */
+kotlin: {
+  tech:"Kotlin", title:"Android の公式言語", era:"Android 開発の現代",
+  senpai:"Kotlin は Java の資産を活かしながら、null の事故から守ってくれる言語だ。Android の公式言語になったのには、現場の理由がある。コルーチンの読みやすい非同期も、大きな武器だよ。",
+  request:"Android アプリの開発チームからの依頼。「Java の資産があるチームで、Android アプリを作りたい。安全に、モダンに書きたい」",
+  constraints:["null が原因の事故を、防げること","既存の Java 資産を、活かせること"],
+  decisions:[
+    { q:"null の扱いはどうする？", options:[
+      { label:"型で『null になり得るか』を区別して書く", score:2, fb:"null が入り込む場所が、コードの形に現れる。Java 時代の最大の事故源が、設計で防げる。" },
+      { label:"実行時のチェックに頼る", score:0, fb:"チェック漏れの場所で NullPointerException が起きた。人の注意に頼る守りは、必ずどこかで切れる。" }
+    ]},
+    { q:"既存の Java 資産の扱いは？", options:[
+      { label:"相互運用で、既存コードをそのまま活かす", score:2, fb:"Kotlin と Java は同じ土台で混ぜて使える。資産を捨てずに、モダン化が進められる。" },
+      { label:"全部を Kotlin に書き直す", score:0, fb:"書き直しの期間と事故に、開発が止まった。活かせる資産を捨てるのは、移行の敗け筋だ。" }
+    ]}
+  ],
+  assemble:{ intro:"Kotlin の非同期処理（コルーチン）の流れを、順番に並べよう。", pieces:[
+    "リクエストを受け取る",
+    "コルーチンで非同期処理を始める",
+    "結果を待つ間、処理を中断（サスペンド）する",
+    "結果が返ったら、続きを実行する",
+    "画面を更新する"
+  ]},
+  outcomes:{
+    good:"Java 資産を活かしながら、null の事故のないモダンなアプリができた。土台を捨てない進化の、良い形だ。",
+    mid:"アプリはできた。だが型の守りの活かし方の分だけ、危うさが残った。",
+    bad:"事故と書き直しで、開発が止まった。守りの設計は、言語が用意したものに乗るのが正解だ。"
+  },
+  explain:"Kotlin は JetBrains が開発したプログラミング言語で、2017年に Android の公式言語となり、後に推奨言語になった。Java との完全な相互運用、型による null 安全、コルーチンによる読みやすい非同期処理が特徴だ。Java の資産と生態系を活かしながら、より安全で簡潔に書ける選択肢として、Android 開発の標準に定着した。",
+  card:{ name:"Kotlin", desc:"Android の公式言語。Java とつながり、型で null から守る。" }
+},
+/* ---------- Objective-C ---------- */
+objc: {
+  tech:"Objective-C", title:"先代の標準を読む", era:"長い資産を守る現場",
+  senpai:"Objective-C は Swift の前の、Apple の標準だ。角括弧の記法と、オブジェクトへ『メッセージを送る』考え方が特徴。今も膨大な資産が現役で、保守の現場では読めることが力になる。",
+  request:"長く運用している iOS アプリの保守担当からの依頼。「既存のアプリは Objective-C で書かれている。保守を続けながら、新しい機能も少し足したい」",
+  constraints:["既存の資産を、壊さずに活かすこと","新しい部分と、無理なくつなげられること"],
+  decisions:[
+    { q:"既存コードの扱いは？", options:[
+      { label:"既存を活かし、新しい部分は Swift と混在させて足す", score:2, fb:"Apple のプラットフォームは混在を許す設計だ。資産を守りながら、少しずつ新しくできる。" },
+      { label:"全部を Swift に書き直す", score:0, fb:"書き直しの期間に保守が止まり、動いていたものの再現にも苦労した。現役の資産への一括移行は、危険な賭けだ。" }
+    ]},
+    { q:"メモリ管理の作法は？", options:[
+      { label:"ARC の作法に沿って書く", score:2, fb:"自動参照カウントの決まりに乗れば、メモリ管理は仕組みが担う。先代の言語でも、現代の作法がある。" },
+      { label:"独自のやり方で管理しようとする", score:1, fb:"動く場面はある。だがリークと解放済み参照の危険が、静かに増えていった。" }
+    ]}
+  ],
+  assemble:{ intro:"Objective-C のメッセージ送信の流れを、順番に並べよう。", pieces:[
+    "オブジェクトを用意する",
+    "[受け手 メッセージ] の形で、メッセージを送る",
+    "対応するメソッドが実行される",
+    "結果が返る",
+    "次の処理へ進む"
+  ]},
+  outcomes:{
+    good:"資産を守りながら、新機能も足せた。先代の言語を読めることが、現場の守りの力になった。",
+    mid:"保守は続いた。だが作法の理解の甘さが、危うさとして残った。",
+    bad:"書き直しで保守が止まった。現役の資産は、まず守る。進化はその次だ。"
+  },
+  explain:"Objective-C は、C 言語に Smalltalk 風のオブジェクト指向（メッセージ送信）を加えた言語で、長く Apple プラットフォームの標準として iOS／macOS アプリを支えた。角括弧の独特な記法と、動的な性格が特徴だ。今は Swift が後を継いだが、膨大な既存資産とライブラリが現役であり、保守の現場では今も『読めること』が求められる言語である。",
+  card:{ name:"Objective-C", desc:"Apple の先代の標準。メッセージ送信の記法で、長い時代と資産を支えた。" }
 }
 };
 /* ================= ENGINE ================= */
