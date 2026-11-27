@@ -93,7 +93,7 @@
       <button class="btn" id="btn-continue">▶ つづきから</button>
       <button class="btn" id="btn-title-zukan">▶ 技術カード図鑑</button>
     </div>
-    <div class="ver">Craftsman v0.19</div>
+    <div class="ver">Craftsman v0.20</div>
   </section>
 
   <!-- home: parts -->
@@ -164,7 +164,7 @@ const PARTS = [
     {id:"scm", name:"ドキュメンテーション・ソースコード管理", scenarios:["svn","git","github","obsidian"]}
   ]},
   {id:5, label:"第5部", name:"現在", chapters:[
-    {id:"ai", name:"AIの時代", scenarios:["vibe","gpt","claude","copilot","cline","bedrock","azureai","models","autogen","hallucination","sys12","jev","yaml","openweight","obsidianai"]},
+    {id:"ai", name:"AIの時代", scenarios:["vibe","gpt","claude","copilot","cline","bedrock","azureai","models","autogen","aiteam","hallucination","sys12","jev","yaml","openweight","obsidianai"]},
     {id:"python", name:"Python", scenarios:["python"]},
     {id:"docker", name:"Docker／コンテナ", scenarios:["docker"]},
     {id:"desktop", name:"モダンデスクトップ", scenarios:["electron","tauri","rust","nsis"]}
@@ -2197,6 +2197,37 @@ autogen: {
   },
   explain:"AutoGen は Microsoft が公開した、複数の AI エージェントを協調させるためのフレームワークだ。役割を与えられたエージェント同士が会話し、分担と相互検証で仕事を進める。単独の AI の弱さ（視点の偏り、誤りの見落とし）を、合議の構造で補う発想が核にある。実践の形として、趣味趣向の異なる3つの人格に合議させる MAGI のようなシステムも、この土台の上にある。なお系譜も押さえておく。AutoGen の後継として、Microsoft は Semantic Kernel と統合した Microsoft Agent Framework（MAF）を打ち出し、企業利用の基盤まで含む方向へ進んでいる。対抗としては CrewAI が知られ、役割を与えたエージェントの『クルー』が協働する設計の分かりやすさで支持を集めた。合議の考え方は1つの製品のものではなく、エージェント時代の共通文法になりつつある。",
   card:{ name:"AutoGen", desc:"複数の AI の合議。視点の多様さで、単独の弱さを補う。" }
+},
+/* ---------- AIエージェント開発チーム（小話） ---------- */
+aiteam: {
+  tech:"AIエージェント開発チーム", title:"小話 ― AI で開発チームを作る", era:"AIソロプレナーと AI事業部の時代",
+  senpai:"ここで小話をひとつ。最近は『AIソロプレナー』——1人の人間と AI の群れで事業を回す人——や、企業が AI エージェントを『AI事業部』として編成する動きが話題だ。その技術的な中身が、AutoGen や後継の MAF の上に組む『AI 組織』だ。実例として、MAGI 型の組織の組み方をやってみよう。",
+  request:"小さな開発会社の代表からの依頼。「人手が足りない。AI エージェントで開発チームを組み、仕事を回したい。ただし、暴走だけは困る」",
+  constraints:["最終決裁は、人間が持つこと","危ない判断を、止められる仕組みがあること"],
+  decisions:[
+    { q:"組織の形は？", options:[
+      { label:"決裁は人間に残し、評議会 → 作業チームの多層組織にする", score:2, fb:"審査する層と、実行する層と、決める人を分ける。人間の組織と同じ、統制の効く形だ。" },
+      { label:"エージェントに全権を委ね、完全自律で回す", score:0, fb:"速そうに見えて、誰も止められない。判断の根拠も追えず、事故のときに責任の所在が消えた。" }
+    ]},
+    { q:"評議会の判定方式は？", options:[
+      { label:"根拠付きの Allow／Hold／Deny とし、Deny が1票でもあれば止める", score:2, fb:"単純多数決ではない、フェイルセーフ型の合議だ。危ない変更ほど、止まりやすくなる。" },
+      { label:"単純多数決で、速く決める", score:1, fb:"回りはする。だが少数派の『危ない』という声が、数で消えてしまう設計になった。" }
+    ]}
+  ],
+  assemble:{ intro:"AI 開発チームの仕事の流れを、順番に並べよう。", pieces:[
+    "要件を受ける",
+    "MAGI 評議会が審査する",
+    "作業チームが実行する",
+    "レビューとテストを通す",
+    "人間が最終決裁する"
+  ]},
+  outcomes:{
+    good:"少人数でも開発が回り、危ない変更は評議会で止まった。AI ソロプレナーや AI事業部の、実像に近い形ができた。",
+    mid:"チームは回った。だがエージェント間の調整負荷と、処理コストの増加が課題として残った。",
+    bad:"止める仕組みのない自律は、暴走と紙一重だった。組織には、決裁者とブレーキが要る。"
+  },
+  explain:"AutoGen や後継の MAF のような基盤の上では、エージェントを『組織』として編成できる。実例が MAGI 型 AI 組織だ。最上位は人間で、最終決裁を持つ。その下で Orchestrator がタスクの振り分けと結果の統合を担い、MAGI 評議会（Melchior＝論理と整合性、Balthasar＝創造性と代替案、Caspar＝リスクと運用）が、根拠付きで Allow／Hold／Deny を返す。Deny が1票でもあれば止まる、フェイルセーフ型の合議である。実行は Architect（設計）、Researcher（調査）、Developer（実装）、Reviewer（レビュー）、Tester（テスト）の作業チームが担い、意思決定はしない。この形は、AIソロプレナーや AI事業部といった新しい働き方の、技術的な中身でもある。要点はひとつ。AI を決裁者にしないこと。コストの増加と調整の負荷は、その代償として引き受ける。",
+  card:{ name:"AIエージェント開発チーム", desc:"小話。評議会と作業チームを編成する、人間が決裁する AI 組織。" }
 },
 /* ---------- ハルシネーション対策 ---------- */
 hallucination: {
