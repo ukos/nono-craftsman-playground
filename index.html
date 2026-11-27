@@ -32,6 +32,18 @@
   #scr-title img.logo{width:100%;max-width:420px;border-radius:14px;box-shadow:0 10px 34px rgba(0,0,0,.45)}
   #scr-title .sub{margin:14px 0 4px;color:var(--muted);font-size:14px;letter-spacing:.04em}
   #scr-title .ver{margin-top:26px;color:#5f7ea3;font-size:12px;text-align:right}
+  #roll-box{height:62vh;overflow:hidden;position:relative}
+  #roll-inner{text-align:center;animation:rollup 78s linear forwards;padding:0 8px}
+  @keyframes rollup{from{transform:translateY(62vh)}to{transform:translateY(-100%)}}
+  .roll-head{font-size:20px;font-weight:700;letter-spacing:.14em;margin:26px 0 18px;color:var(--accent,#e8a33d)}
+  .roll-part{font-size:17px;font-weight:700;letter-spacing:.1em;margin:34px 0 6px}
+  .roll-chap{font-size:13px;color:var(--muted);letter-spacing:.08em;margin:16px 0 4px}
+  .roll-tech{font-size:15px;line-height:1.9}
+  .roll-role{font-size:13px;color:var(--muted);letter-spacing:.1em;margin-top:22px}
+  .roll-name{font-size:22px;font-weight:700;letter-spacing:.06em;margin-top:2px}
+  .roll-closing{font-size:15px;line-height:2;margin-top:44px}
+  #ending-card img.logo-wide{width:100%;border-radius:14px;box-shadow:0 10px 34px rgba(0,0,0,.45)}
+  #ending-card .fin{margin-top:16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.9}
   .title-btns{margin-top:22px;text-align:left}
 
   /* ---------- common ---------- */
@@ -92,8 +104,9 @@
       <button class="btn primary" id="btn-start">▶ はじめから</button>
       <button class="btn" id="btn-continue">▶ つづきから</button>
       <button class="btn" id="btn-title-zukan">▶ 技術カード図鑑</button>
+      <button class="btn" id="btn-title-ending">▶ エンドロール</button>
     </div>
-    <div class="ver">Craftsman v0.22</div>
+    <div class="ver">Craftsman v0.23</div>
   </section>
 
   <!-- home: parts -->
@@ -134,6 +147,18 @@
     <div class="note" id="zukan-count"></div>
     <div class="zgrid" id="zukan-grid"></div>
     <button class="btn ghost" id="btn-zukan-back">▶ もどる</button>
+  </section>
+
+  <!-- ending -->
+  <section id="scr-ending" class="hidden">
+    <div class="topbar"><span class="rank" id="ending-rank">Craftsman</span><span class="ttl">エンドロール</span></div>
+    <div id="roll-box"><div id="roll-inner"></div></div>
+    <div id="ending-card" class="hidden">
+      <img class="logo-wide" src="assets/logo-ending.jpg" alt="Craftsman — The Making of an Engineer">
+      <div class="fin">新人コーダーから、Craftsman へ。<br>あなたの歩みは、続いていく。</div>
+    </div>
+    <button class="btn" id="btn-roll-skip">▶ スキップ</button>
+    <button class="btn ghost hidden" id="btn-ending-back">▶ タイトルへ戻る</button>
   </section>
 
 </div>
@@ -2924,7 +2949,7 @@ function storeSave(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save));
 function hasSave(){ return Object.keys(save.cleared).length > 0; }
 
 const $ = id => document.getElementById(id);
-const SCREENS = ["scr-title","scr-home","scr-part","scr-chapter","scr-play","scr-zukan"];
+const SCREENS = ["scr-title","scr-home","scr-part","scr-chapter","scr-play","scr-zukan","scr-ending"];
 function show(id){
   SCREENS.forEach(s => $(s).classList.toggle("hidden", s !== id));
   window.scrollTo(0,0);
@@ -2942,7 +2967,7 @@ function partCleared(part){
 }
 function rankIndex(){ return Math.min(PARTS.filter(partCleared).length, RANKS.length - 1); }
 function rankName(){ return RANKS[rankIndex()]; }
-function setRanks(){ ["home-rank","part-rank","chap-rank","play-rank","zukan-rank"].forEach(id => { const el = $(id); if(el) el.textContent = rankName(); }); }
+function setRanks(){ ["home-rank","part-rank","chap-rank","play-rank","zukan-rank","ending-rank"].forEach(id => { const el = $(id); if(el) el.textContent = rankName(); }); }
 const RANK_LABEL = { good:"成功", mid:"一部成功", bad:"失敗" };
 
 /* ---- navigation state ---- */
@@ -3145,6 +3170,7 @@ function renderRecord(){
     '<div class="zd">' + esc(play.sc.card.desc) + '</div>' +
     '<div class="zr rank-' + key + '">このシナリオの結果：' + RANK_LABEL[key] + "</div></div>" +
     "<p style='margin-top:12px'>現在の呼称は「" + rankName() + "」。</p></div>");
+  if(rankName() === "Craftsman") nextBtn("エンドロールを見る", renderEnding);
   nextBtn("シナリオ選択へ戻る", () => { renderChapter(); show("scr-chapter"); });
 }
 
@@ -3167,20 +3193,68 @@ function renderZukan(){
   show("scr-zukan");
 }
 
+/* ---- ending roll ---- */
+let rollDone = false;
+function renderEnding(){
+  setRanks();
+  rollDone = false;
+  let h = '<div class="roll-head">知ったこと</div>';
+  PARTS.forEach(part => {
+    h += '<div class="roll-part">' + esc(part.label + " " + part.name) + "</div>";
+    part.chapters.forEach(ch => {
+      const ids = ch.scenarios.filter(id => SCENARIOS[id]);
+      if(!ids.length) return;
+      h += '<div class="roll-chap">' + esc(ch.name) + "</div>";
+      ids.forEach(id => { h += '<div class="roll-tech">' + esc(SCENARIOS[id].tech) + "</div>"; });
+    });
+  });
+  h += '<div class="roll-part" style="margin-top:56px">作った人達</div>';
+  h += '<div class="roll-role">企画・原案・監修</div><div class="roll-name">Uko</div>';
+  h += '<div class="roll-role">制作・シナリオ・実装・検品</div><div class="roll-name">nono</div>';
+  h += '<div class="roll-closing">新人コーダーから、Craftsman へ。<br>あなたの歩みは、続いていく。</div>';
+  const inner = $("roll-inner");
+  inner.innerHTML = h;
+  inner.style.animation = "none";
+  void inner.offsetWidth;
+  inner.style.animation = "";
+  $("roll-box").classList.remove("hidden");
+  $("ending-card").classList.add("hidden");
+  $("btn-roll-skip").classList.remove("hidden");
+  $("btn-ending-back").classList.add("hidden");
+  show("scr-ending");
+}
+function finishRoll(){
+  if(rollDone) return;
+  rollDone = true;
+  $("roll-inner").style.animation = "none";
+  $("roll-box").classList.add("hidden");
+  $("ending-card").classList.remove("hidden");
+  $("btn-roll-skip").classList.add("hidden");
+  $("btn-ending-back").classList.remove("hidden");
+}
+function refreshTitle(){
+  $("btn-continue").disabled = !hasSave();
+  $("btn-title-ending").disabled = rankName() !== "Craftsman";
+}
+
 /* ---- wiring ---- */
 $("btn-start").onclick = () => {
   if(hasSave() && !confirm("はじめから始めると、保存された進行状況は消えます。よろしいですか？")) return;
   save = { cleared:{} }; storeSave(); renderHome();
 };
 $("btn-continue").onclick = () => renderHome();
-$("btn-continue").disabled = !hasSave();
 $("btn-title-zukan").onclick = () => { zukanFrom = "scr-title"; renderZukan(); };
+$("btn-title-ending").onclick = () => renderEnding();
+$("roll-inner").addEventListener("animationend", finishRoll);
+$("btn-roll-skip").onclick = () => finishRoll();
+$("btn-ending-back").onclick = () => { refreshTitle(); show("scr-title"); };
 $("btn-home-zukan").onclick = () => { zukanFrom = "scr-home"; renderZukan(); };
-$("btn-home-title").onclick = () => show("scr-title");
+$("btn-home-title").onclick = () => { refreshTitle(); show("scr-title"); };
 $("btn-part-back").onclick = () => renderHome();
 $("btn-chap-back").onclick = () => { renderPart(); show("scr-part"); };
 $("btn-play-quit").onclick = () => { renderChapter(); show("scr-chapter"); };
 $("btn-zukan-back").onclick = () => show(zukanFrom);
+refreshTitle();
 setRanks();
 </script>
 </body>
